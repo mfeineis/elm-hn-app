@@ -1,4 +1,10 @@
+*.swp
+.#*
+.elm-static-html/
 # elm-package generated files
+dist/
 elm-stuff
+node_modules/
+private/
 # elm-repl generated files
 repl-temp-*

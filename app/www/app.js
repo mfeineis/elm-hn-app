@@ -9386,6 +9386,58 @@ var _mfeineis$elm_hn_app$Data_Story$Item = function (a) {
 	};
 };
 
+var _mfeineis$elm_hn_app$Ports$encoder = function (msg) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'msg',
+				_1: _elm_lang$core$Json_Encode$string(
+					_elm_lang$core$Basics$toString(msg))
+			},
+			_1: {ctor: '[]'}
+		});
+};
+var _mfeineis$elm_hn_app$Ports$fromElm = _elm_lang$core$Native_Platform.outgoingPort(
+	'fromElm',
+	function (v) {
+		return v;
+	});
+var _mfeineis$elm_hn_app$Ports$toElm = _elm_lang$core$Native_Platform.incomingPort('toElm', _elm_lang$core$Json_Decode$value);
+var _mfeineis$elm_hn_app$Ports$Envelope = function (a) {
+	return {msg: a};
+};
+var _mfeineis$elm_hn_app$Ports$Unknown = function (a) {
+	return {ctor: 'Unknown', _0: a};
+};
+var _mfeineis$elm_hn_app$Ports$Pong = {ctor: 'Pong'};
+var _mfeineis$elm_hn_app$Ports$Ping = {ctor: 'Ping'};
+var _mfeineis$elm_hn_app$Ports$Invalid = function (a) {
+	return {ctor: 'Invalid', _0: a};
+};
+var _mfeineis$elm_hn_app$Ports$decoder = function (json) {
+	var result = A2(
+		_elm_lang$core$Json_Decode$decodeValue,
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			_mfeineis$elm_hn_app$Ports$Envelope,
+			A2(_elm_lang$core$Json_Decode$field, 'msg', _elm_lang$core$Json_Decode$string)),
+		json);
+	var _p0 = result;
+	if (_p0.ctor === 'Err') {
+		return _mfeineis$elm_hn_app$Ports$Invalid(_p0._0);
+	} else {
+		var _p2 = _p0._0.msg;
+		var _p1 = _p2;
+		if (_p1 === 'Ping') {
+			return _mfeineis$elm_hn_app$Ports$Ping;
+		} else {
+			return _mfeineis$elm_hn_app$Ports$Unknown(_p2);
+		}
+	}
+};
+
 var _mfeineis$elm_hn_app$Request_Story$apiRoot = 'https://hacker-news.firebaseio.com/v0';
 var _mfeineis$elm_hn_app$Request_Story$fetchIds = function (endpoint) {
 	return A2(
@@ -14906,14 +14958,122 @@ var _mfeineis$elm_hn_app$Main$setLoaded = function (_p10) {
 				_mfeineis$elm_hn_app$Main$getPage(_p12))
 		});
 };
+var _mfeineis$elm_hn_app$Main$StoriesLoaded = function (a) {
+	return {ctor: 'StoriesLoaded', _0: a};
+};
+var _mfeineis$elm_hn_app$Main$StoryIdsLoaded = function (a) {
+	return {ctor: 'StoryIdsLoaded', _0: a};
+};
+var _mfeineis$elm_hn_app$Main$init = {
+	ctor: '_Tuple2',
+	_0: {
+		pageState: _mfeineis$elm_hn_app$Main$Loading(_mfeineis$elm_hn_app$Main$NewStories),
+		stories: {ctor: '[]'},
+		storyIds: {ctor: '[]'}
+	},
+	_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchNewIds)
+};
+var _mfeineis$elm_hn_app$Main$update = F2(
+	function (msg, model) {
+		var _p13 = msg;
+		switch (_p13.ctor) {
+			case 'Interop':
+				var msg2 = A2(_elm_lang$core$Debug$log, 'Interop.msg', _p13._0);
+				return A2(
+					_elm_lang$core$Debug$log,
+					'Interop.result',
+					{
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _mfeineis$elm_hn_app$Ports$fromElm(
+							_mfeineis$elm_hn_app$Ports$encoder(_mfeineis$elm_hn_app$Ports$Pong))
+					});
+			case 'ShowPage':
+				switch (_p13._0.ctor) {
+					case 'BestStories':
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_mfeineis$elm_hn_app$Main$setLoading,
+								_mfeineis$elm_hn_app$Main$BestStories,
+								_mfeineis$elm_hn_app$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchBestIds)
+						};
+					case 'NewStories':
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_mfeineis$elm_hn_app$Main$setLoading,
+								_mfeineis$elm_hn_app$Main$NewStories,
+								_mfeineis$elm_hn_app$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchNewIds)
+						};
+					default:
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_mfeineis$elm_hn_app$Main$setLoading,
+								_mfeineis$elm_hn_app$Main$TopStories,
+								_mfeineis$elm_hn_app$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchTopIds)
+						};
+				}
+			case 'StoriesLoaded':
+				if (_p13._0.ctor === 'Err') {
+					return {
+						ctor: '_Tuple2',
+						_0: _mfeineis$elm_hn_app$Main$setLoaded(
+							_mfeineis$elm_hn_app$Main$resetStories(model)),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _mfeineis$elm_hn_app$Main$setLoaded(
+							A2(
+								_mfeineis$elm_hn_app$Main$setStories,
+								A2(_elm_lang$core$List$filterMap, _elm_lang$core$Basics$identity, _p13._0._0),
+								model)),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			default:
+				if (_p13._0.ctor === 'Err') {
+					return {
+						ctor: '_Tuple2',
+						_0: _mfeineis$elm_hn_app$Main$setLoaded(
+							_mfeineis$elm_hn_app$Main$resetStories(
+								A2(
+									_mfeineis$elm_hn_app$Main$setStoryIds,
+									{ctor: '[]'},
+									model))),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					var _p14 = _p13._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: A2(
+							_mfeineis$elm_hn_app$Main$setLoading,
+							_mfeineis$elm_hn_app$Main$getPage(model),
+							_mfeineis$elm_hn_app$Main$resetStories(
+								A2(_mfeineis$elm_hn_app$Main$setStoryIds, _p14, model))),
+						_1: A2(
+							_mfeineis$elm_hn_app$Request_Story$fetchStories,
+							_mfeineis$elm_hn_app$Main$StoriesLoaded,
+							A2(_elm_lang$core$List$take, 5, _p14))
+					};
+				}
+		}
+	});
 var _mfeineis$elm_hn_app$Main$ShowPage = function (a) {
 	return {ctor: 'ShowPage', _0: a};
 };
 var _mfeineis$elm_hn_app$Main$navButton = F3(
 	function (label, reference, pageState) {
-		var _p13 = pageState;
-		if (_p13.ctor === 'Loaded') {
-			return _elm_lang$core$Native_Utils.eq(reference, _p13._0) ? A2(
+		var _p15 = pageState;
+		if (_p15.ctor === 'Loaded') {
+			return _elm_lang$core$Native_Utils.eq(reference, _p15._0) ? A2(
 				_mfeineis$elm_hn_app$Styled$navButtonSelected,
 				{
 					ctor: '::',
@@ -14954,9 +15114,9 @@ var _mfeineis$elm_hn_app$Main$navButton = F3(
 				});
 		}
 	});
-var _mfeineis$elm_hn_app$Main$headerItems = function (_p14) {
-	var _p15 = _p14;
-	var _p16 = _p15.pageState;
+var _mfeineis$elm_hn_app$Main$headerItems = function (_p16) {
+	var _p17 = _p16;
+	var _p18 = _p17.pageState;
 	return {
 		ctor: '::',
 		_0: _mfeineis$elm_hn_app$Styled$navLogo(
@@ -14983,13 +15143,13 @@ var _mfeineis$elm_hn_app$Main$headerItems = function (_p14) {
 				}),
 			_1: {
 				ctor: '::',
-				_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'new', _mfeineis$elm_hn_app$Main$NewStories, _p16),
+				_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'new', _mfeineis$elm_hn_app$Main$NewStories, _p18),
 				_1: {
 					ctor: '::',
-					_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'top', _mfeineis$elm_hn_app$Main$TopStories, _p16),
+					_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'top', _mfeineis$elm_hn_app$Main$TopStories, _p18),
 					_1: {
 						ctor: '::',
-						_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'best', _mfeineis$elm_hn_app$Main$BestStories, _p16),
+						_0: A3(_mfeineis$elm_hn_app$Main$navButton, 'best', _mfeineis$elm_hn_app$Main$BestStories, _p18),
 						_1: {ctor: '[]'}
 					}
 				}
@@ -14997,36 +15157,36 @@ var _mfeineis$elm_hn_app$Main$headerItems = function (_p14) {
 		}
 	};
 };
-var _mfeineis$elm_hn_app$Main$view = function (_p17) {
-	var _p18 = _p17;
-	var _p21 = _p18.stories;
+var _mfeineis$elm_hn_app$Main$view = function (_p19) {
+	var _p20 = _p19;
+	var _p23 = _p20.stories;
 	var message = function () {
-		var _p19 = _p18.pageState;
-		if (_p19.ctor === 'Loading') {
+		var _p21 = _p20.pageState;
+		if (_p21.ctor === 'Loading') {
 			return A2(
 				_elm_lang$core$Basics_ops['++'],
 				'Loading page ',
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(_p19._0),
+					_elm_lang$core$Basics$toString(_p21._0),
 					' ...'));
 		} else {
 			return A2(
 				_elm_lang$core$Basics_ops['++'],
 				'No stories around for page ',
-				_elm_lang$core$Basics$toString(_p19._0));
+				_elm_lang$core$Basics$toString(_p21._0));
 		}
 	}();
 	var storyList = function () {
-		var _p20 = _p21;
-		if (_p20.ctor === '[]') {
+		var _p22 = _p23;
+		if (_p22.ctor === '[]') {
 			return {
 				ctor: '::',
 				_0: _elm_lang$html$Html$text(message),
 				_1: {ctor: '[]'}
 			};
 		} else {
-			return A2(_elm_lang$core$List$map, _mfeineis$elm_hn_app$Main$renderStory, _p21);
+			return A2(_elm_lang$core$List$map, _mfeineis$elm_hn_app$Main$renderStory, _p23);
 		}
 	}();
 	return A2(
@@ -15037,7 +15197,7 @@ var _mfeineis$elm_hn_app$Main$view = function (_p17) {
 			_0: A2(
 				_mfeineis$elm_hn_app$Styled$pageHeader,
 				{ctor: '[]'},
-				_mfeineis$elm_hn_app$Main$headerItems(_p18)),
+				_mfeineis$elm_hn_app$Main$headerItems(_p20)),
 			_1: {
 				ctor: '::',
 				_0: A2(
@@ -15048,112 +15208,22 @@ var _mfeineis$elm_hn_app$Main$view = function (_p17) {
 			}
 		});
 };
-var _mfeineis$elm_hn_app$Main$StoriesLoaded = function (a) {
-	return {ctor: 'StoriesLoaded', _0: a};
+var _mfeineis$elm_hn_app$Main$Interop = function (a) {
+	return {ctor: 'Interop', _0: a};
 };
-var _mfeineis$elm_hn_app$Main$StoryIdsLoaded = function (a) {
-	return {ctor: 'StoryIdsLoaded', _0: a};
+var _mfeineis$elm_hn_app$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$batch(
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$core$Platform_Sub$map,
+				_mfeineis$elm_hn_app$Main$Interop,
+				_mfeineis$elm_hn_app$Ports$toElm(_mfeineis$elm_hn_app$Ports$decoder)),
+			_1: {ctor: '[]'}
+		});
 };
-var _mfeineis$elm_hn_app$Main$init = {
-	ctor: '_Tuple2',
-	_0: {
-		pageState: _mfeineis$elm_hn_app$Main$Loading(_mfeineis$elm_hn_app$Main$NewStories),
-		stories: {ctor: '[]'},
-		storyIds: {ctor: '[]'}
-	},
-	_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchNewIds)
-};
-var _mfeineis$elm_hn_app$Main$update = F2(
-	function (msg, model) {
-		var _p22 = msg;
-		switch (_p22.ctor) {
-			case 'ShowPage':
-				switch (_p22._0.ctor) {
-					case 'BestStories':
-						return {
-							ctor: '_Tuple2',
-							_0: A2(
-								_mfeineis$elm_hn_app$Main$setLoading,
-								_mfeineis$elm_hn_app$Main$BestStories,
-								_mfeineis$elm_hn_app$Main$resetStories(model)),
-							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchBestIds)
-						};
-					case 'NewStories':
-						return {
-							ctor: '_Tuple2',
-							_0: A2(
-								_mfeineis$elm_hn_app$Main$setLoading,
-								_mfeineis$elm_hn_app$Main$NewStories,
-								_mfeineis$elm_hn_app$Main$resetStories(model)),
-							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchNewIds)
-						};
-					default:
-						return {
-							ctor: '_Tuple2',
-							_0: A2(
-								_mfeineis$elm_hn_app$Main$setLoading,
-								_mfeineis$elm_hn_app$Main$TopStories,
-								_mfeineis$elm_hn_app$Main$resetStories(model)),
-							_1: A2(_elm_lang$http$Http$send, _mfeineis$elm_hn_app$Main$StoryIdsLoaded, _mfeineis$elm_hn_app$Request_Story$fetchTopIds)
-						};
-				}
-			case 'StoriesLoaded':
-				if (_p22._0.ctor === 'Err') {
-					return {
-						ctor: '_Tuple2',
-						_0: _mfeineis$elm_hn_app$Main$setLoaded(
-							_mfeineis$elm_hn_app$Main$resetStories(model)),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _mfeineis$elm_hn_app$Main$setLoaded(
-							A2(
-								_mfeineis$elm_hn_app$Main$setStories,
-								A2(_elm_lang$core$List$filterMap, _elm_lang$core$Basics$identity, _p22._0._0),
-								model)),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			default:
-				if (_p22._0.ctor === 'Err') {
-					return {
-						ctor: '_Tuple2',
-						_0: _mfeineis$elm_hn_app$Main$setLoaded(
-							_mfeineis$elm_hn_app$Main$resetStories(
-								A2(
-									_mfeineis$elm_hn_app$Main$setStoryIds,
-									{ctor: '[]'},
-									model))),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					var _p23 = _p22._0._0;
-					return {
-						ctor: '_Tuple2',
-						_0: A2(
-							_mfeineis$elm_hn_app$Main$setLoading,
-							_mfeineis$elm_hn_app$Main$getPage(model),
-							_mfeineis$elm_hn_app$Main$resetStories(
-								A2(_mfeineis$elm_hn_app$Main$setStoryIds, _p23, model))),
-						_1: A2(
-							_mfeineis$elm_hn_app$Request_Story$fetchStories,
-							_mfeineis$elm_hn_app$Main$StoriesLoaded,
-							A2(_elm_lang$core$List$take, 5, _p23))
-					};
-				}
-		}
-	});
 var _mfeineis$elm_hn_app$Main$main = _elm_lang$html$Html$program(
-	{
-		init: _mfeineis$elm_hn_app$Main$init,
-		subscriptions: function (_p24) {
-			return _elm_lang$core$Platform_Sub$none;
-		},
-		update: _mfeineis$elm_hn_app$Main$update,
-		view: _mfeineis$elm_hn_app$Main$view
-	})();
+	{init: _mfeineis$elm_hn_app$Main$init, subscriptions: _mfeineis$elm_hn_app$Main$subscriptions, update: _mfeineis$elm_hn_app$Main$update, view: _mfeineis$elm_hn_app$Main$view})();
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

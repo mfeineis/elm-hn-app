@@ -5,6 +5,8 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode as Decode
+import Ports exposing (Msg(..))
 import Request.Story
 import Styled
 
@@ -28,9 +30,10 @@ type alias Model =
 
 
 type Msg
-    = StoryIdsLoaded (Result Http.Error (List StoryId))
-    | StoriesLoaded (Result Http.Error (List (Maybe Story)))
+    = Interop Ports.Msg
     | ShowPage Page
+    | StoryIdsLoaded (Result Http.Error (List StoryId))
+    | StoriesLoaded (Result Http.Error (List (Maybe Story)))
 
 
 
@@ -51,10 +54,18 @@ main : Program Never Model Msg
 main =
     Html.program
         { init = init
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = view
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map Interop
+            (Ports.toElm Ports.decoder)
+        ]
 
 
 
@@ -64,6 +75,14 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Interop msg ->
+            let
+                msg2 =
+                    Debug.log "Interop.msg" msg
+            in
+            Debug.log "Interop.result"
+                ( model, Ports.fromElm (Ports.encoder Pong) )
+
         ShowPage BestStories ->
             ( model
                 |> resetStories

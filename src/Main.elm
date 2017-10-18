@@ -8,9 +8,15 @@ import Http
 import Request.Story
 
 
+type Page
+    = BestStories
+    | NewStories
+    | TopStories
+
+
 type PageState
-    = Loading
-    | Loaded
+    = Loaded
+    | Loading
 
 
 type alias Model =
@@ -23,7 +29,7 @@ type alias Model =
 type Msg
     = StoryIdsLoaded (Result Http.Error (List StoryId))
     | StoriesLoaded (Result Http.Error (List (Maybe Story)))
-    | ShowCategory String
+    | ShowPage Page
 
 
 
@@ -32,7 +38,10 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { pageState = Loading, stories = [], storyIds = [] }
+    ( { pageState = Loading
+      , stories = []
+      , storyIds = []
+      }
     , Http.send StoryIdsLoaded Request.Story.fetchNewIds
     )
 
@@ -54,29 +63,28 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ShowCategory "beststories" ->
-            ( model |> setLoading
+        ShowPage BestStories ->
+            ( model
+                |> setLoading
             , Http.send StoryIdsLoaded Request.Story.fetchBestIds
             )
 
-        ShowCategory "newstories" ->
-            ( model |> setLoading
+        ShowPage NewStories ->
+            ( model
+                |> setLoading
             , Http.send StoryIdsLoaded Request.Story.fetchNewIds
             )
 
-        ShowCategory "topstories" ->
-            ( model |> setLoading
+        ShowPage TopStories ->
+            ( model
+                |> setLoading
             , Http.send StoryIdsLoaded Request.Story.fetchTopIds
             )
 
-        ShowCategory _ ->
-            -- Hmm, this seems off
-            ( model |> setLoaded
-            , Cmd.none
-            )
-
         StoriesLoaded (Err _) ->
-            ( { model | stories = [] } |> setLoaded
+            ( model
+                |> resetStories
+                |> setLoaded
             , Cmd.none
             )
 
@@ -85,27 +93,37 @@ update msg model =
                 filtered =
                     List.filterMap identity stories
             in
-            ( { model | stories = filtered } |> setLoaded
+            ( { model | stories = filtered }
+                |> setLoaded
             , Cmd.none
             )
 
         StoryIdsLoaded (Err _) ->
-            ( { model | stories = [], storyIds = [] }
+            ( { model | storyIds = [] }
+                |> resetStories
                 |> setLoaded
             , Cmd.none
             )
 
         StoryIdsLoaded (Ok ids) ->
-            ( { model | stories = [], storyIds = ids }
+            ( { model | storyIds = ids }
+                |> resetStories
                 |> setLoading
             , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
             )
 
 
+resetStories : Model -> Model
+resetStories model =
+    { model | stories = [] }
+
+
+setLoaded : Model -> Model
 setLoaded model =
     { model | pageState = Loaded }
 
 
+setLoading : Model -> Model
 setLoading model =
     { model | pageState = Loading }
 
@@ -148,7 +166,7 @@ renderStory { descendants, id, title, url } =
                     ""
 
                 Just amount ->
-                    "(" ++ toString amount ++ ")"
+                    " (" ++ toString amount ++ ")"
     in
     case url of
         Nothing ->
@@ -172,12 +190,11 @@ headerItems { pageState } =
     case pageState of
         Loading ->
             [ Html.span [] [ Html.text "[Y]" ]
-            , Html.span [] [ Html.text "Loading" ]
             ]
 
         Loaded ->
             [ Html.span [] [ Html.text "[Y]" ]
-            , Html.button [ onClick (ShowCategory "beststories") ] [ Html.text "best" ]
-            , Html.button [ onClick (ShowCategory "newstories") ] [ Html.text "new" ]
-            , Html.button [ onClick (ShowCategory "topstories") ] [ Html.text "top" ]
+            , Html.button [ onClick (ShowPage BestStories) ] [ Html.text "best" ]
+            , Html.button [ onClick (ShowPage NewStories) ] [ Html.text "new" ]
+            , Html.button [ onClick (ShowPage TopStories) ] [ Html.text "top" ]
             ]

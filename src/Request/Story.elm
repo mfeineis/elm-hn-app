@@ -23,14 +23,14 @@ fetchNewIds =
     fetchIds "/newstories"
 
 
-fetchStories : (Result Http.Error (List Story) -> msg) -> List StoryId -> Cmd msg
+fetchStories : (Result Http.Error (List (Maybe Story)) -> msg) -> List StoryId -> Cmd msg
 fetchStories msg ids =
     Task.attempt msg <|
         Task.sequence
             (List.map (fetchStory >> Http.toTask) ids)
 
 
-fetchStory : StoryId -> Http.Request Story
+fetchStory : StoryId -> Http.Request (Maybe Story)
 fetchStory id =
     Http.get
         (apiRoot ++ "/item/" ++ Story.storyIdToString id ++ ".json")

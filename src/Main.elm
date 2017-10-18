@@ -15,7 +15,7 @@ type alias Model =
 
 type Msg
     = StoryIdsLoaded (Result Http.Error (List StoryId))
-    | StoriesLoaded (Result Http.Error (List Story))
+    | StoriesLoaded (Result Http.Error (List (Maybe Story)))
 
 
 
@@ -58,7 +58,11 @@ update msg model =
             ( { model | stories = [] }, Cmd.none )
 
         StoriesLoaded (Ok stories) ->
-            ( { model | stories = stories }, Cmd.none )
+            let
+                filtered =
+                    List.filterMap identity stories
+            in
+            ( { model | stories = filtered }, Cmd.none )
 
 
 

@@ -27,14 +27,15 @@ storyIdDecoder =
     Decode.int
 
 
-decoder : Decoder Story
+decoder : Decoder (Maybe Story)
 decoder =
-    Decode.map5 Story
-        (Decode.field "id" storyIdDecoder)
-        (Decode.field "by" Decode.string)
-        (Decode.maybe (Decode.field "url" Decode.string))
-        (Decode.field "title" Decode.string)
-        (Decode.maybe (Decode.field "descendants" Decode.int))
+    Decode.maybe <|
+        Decode.map5 Story
+            (Decode.field "id" storyIdDecoder)
+            (Decode.field "by" Decode.string)
+            (Decode.maybe (Decode.field "url" Decode.string))
+            (Decode.field "title" Decode.string)
+            (Decode.maybe (Decode.field "descendants" Decode.int))
 
 
 type alias Story =

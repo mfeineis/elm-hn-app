@@ -29,9 +29,12 @@ storyIdDecoder =
 
 decoder : Decoder Story
 decoder =
-    Decode.map2 Story
+    Decode.map5 Story
         (Decode.field "id" storyIdDecoder)
+        (Decode.field "by" Decode.string)
+        (Decode.maybe (Decode.field "url" Decode.string))
         (Decode.field "title" Decode.string)
+        (Decode.maybe (Decode.field "descendants" Decode.int))
 
 
 type alias Story =
@@ -39,19 +42,21 @@ type alias Story =
 
     --, deleted : Bool
     --, type_ : String
-    --, by : String
+    , by : String
+
     --, time : Int
     --, text : String
     --, dead : Bool
     --, parent : Int
     --, poll : Int
     --, kids : List Int
-    --, url : String
+    , url : Maybe String
+
     --, score : Int
     , title : String
 
     --, parts : List Int
-    --, descendants : Int
+    , descendants : Maybe Int
     }
 
 

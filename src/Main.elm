@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Data.Story exposing (Story, StoryId)
 import Html exposing (Html)
+import Html.Attributes as Attr
 import Http
 import Request.Story
 
@@ -46,7 +47,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StoryIdsLoaded (Err _) ->
-            ( { model | storyIds = [] }, Cmd.none )
+            ( { model | stories = [], storyIds = [] }, Cmd.none )
 
         StoryIdsLoaded (Ok ids) ->
             ( { model | stories = [], storyIds = ids }
@@ -65,10 +66,31 @@ update msg model =
 
 
 renderStory : Story -> Html msg
-renderStory { id, title } =
-    Html.div []
-        [ Html.text <| "ID" ++ toString id ++ " | " ++ title
-        ]
+renderStory { descendants, id, title, url } =
+    let
+        descendantInfo =
+            case descendants of
+                Nothing ->
+                    ""
+
+                Just amount ->
+                    "(" ++ toString amount ++ ")"
+    in
+    case url of
+        Nothing ->
+            Html.div []
+                [ Html.text <| "ID" ++ Data.Story.storyIdToString id ++ " | " ++ title
+                , Html.text descendantInfo
+                ]
+
+        Just url ->
+            Html.div []
+                [ Html.text <| "ID" ++ Data.Story.storyIdToString id ++ " | "
+                , Html.a [ Attr.href url ]
+                    [ Html.text title
+                    ]
+                , Html.text descendantInfo
+                ]
 
 
 view : Model -> Html Msg

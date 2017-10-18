@@ -27,6 +27,10 @@ meta =
     node "meta"
 
 
+
+-- see https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy
+
+
 cordovaShell : String -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 cordovaShell title bodyAttrs bodyContent =
     node "html"
@@ -39,6 +43,7 @@ cordovaShell title bodyAttrs bodyContent =
                 , content <|
                     String.join "; "
                         [ "default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'"
+                        , "connect-src https://hacker-news.firebaseio.com"
                         , "style-src 'self' 'unsafe-inline' "
                         , "media-src *"
                         , "img-src 'self' data: content:;"

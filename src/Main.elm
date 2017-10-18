@@ -15,8 +15,8 @@ type Page
 
 
 type PageState
-    = Loaded
-    | Loading
+    = Loaded Page
+    | Loading Page
 
 
 type alias Model =
@@ -38,7 +38,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { pageState = Loading
+    ( { pageState = Loading NewStories
       , stories = []
       , storyIds = []
       }
@@ -65,19 +65,22 @@ update msg model =
     case msg of
         ShowPage BestStories ->
             ( model
-                |> setLoading
+                |> resetStories
+                |> setLoading BestStories
             , Http.send StoryIdsLoaded Request.Story.fetchBestIds
             )
 
         ShowPage NewStories ->
             ( model
-                |> setLoading
+                |> resetStories
+                |> setLoading NewStories
             , Http.send StoryIdsLoaded Request.Story.fetchNewIds
             )
 
         ShowPage TopStories ->
             ( model
-                |> setLoading
+                |> resetStories
+                |> setLoading TopStories
             , Http.send StoryIdsLoaded Request.Story.fetchTopIds
             )
 
@@ -89,43 +92,62 @@ update msg model =
             )
 
         StoriesLoaded (Ok stories) ->
-            let
-                filtered =
-                    List.filterMap identity stories
-            in
-            ( { model | stories = filtered }
+            ( model
+                |> setStories (List.filterMap identity stories)
                 |> setLoaded
             , Cmd.none
             )
 
         StoryIdsLoaded (Err _) ->
-            ( { model | storyIds = [] }
+            ( model
+                |> setStoryIds []
                 |> resetStories
                 |> setLoaded
             , Cmd.none
             )
 
         StoryIdsLoaded (Ok ids) ->
-            ( { model | storyIds = ids }
+            ( model
+                |> setStoryIds ids
                 |> resetStories
-                |> setLoading
+                |> setLoading (getPage model)
             , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
             )
 
 
-resetStories : Model -> Model
+getPage : { a | pageState : PageState } -> Page
+getPage ({ pageState } as model) =
+    case pageState of
+        Loaded page ->
+            page
+
+        Loading page ->
+            page
+
+
+resetStories : { a | stories : List Story } -> { a | stories : List Story }
 resetStories model =
     { model | stories = [] }
 
 
-setLoaded : Model -> Model
-setLoaded model =
-    { model | pageState = Loaded }
+setLoaded : { a | pageState : PageState } -> { a | pageState : PageState }
+setLoaded ({ pageState } as model) =
+    { model | pageState = Loaded (getPage model) }
 
 
-setLoading : Model -> Model
-setLoading model =
-    { model | pageState = Loading }
+setLoading : Page -> { a | pageState : PageState } -> { a | pageState : PageState }
+setLoading page ({ pageState } as model) =
+    { model | pageState = Loading page }
+
+
+setStories : List Story -> { a | stories : List Story } -> { a | stories : List Story }
+setStories stories model =
+    { model | stories = stories }
+
+
+setStoryIds : List StoryId -> { a | storyIds : List StoryId } -> { a | storyIds : List StoryId }
+setStoryIds storyIds model =
+    { model | storyIds = storyIds }
 
 
 
@@ -137,11 +159,11 @@ view ({ pageState, stories } as model) =
     let
         message =
             case pageState of
-                Loading ->
-                    "Loading something..."
+                Loading page ->
+                    "Loading page " ++ toString page ++ " ..."
 
-                Loaded ->
-                    "No stories around."
+                Loaded page ->
+                    "No stories around for page " ++ toString page
 
         storyList =
             case stories of
@@ -185,16 +207,24 @@ renderStory { descendants, id, title, url } =
                 ]
 
 
+navButton : String -> Page -> PageState -> Html Msg
+navButton label reference pageState =
+    case pageState of
+        Loaded page ->
+            Html.button
+                [ Attr.disabled (reference == page), onClick (ShowPage reference) ]
+                [ Html.text label ]
+
+        Loading _ ->
+            Html.button
+                [ Attr.disabled True, onClick (ShowPage reference) ]
+                [ Html.text label ]
+
+
 headerItems : { a | pageState : PageState } -> List (Html Msg)
 headerItems { pageState } =
-    case pageState of
-        Loading ->
-            [ Html.span [] [ Html.text "[Y]" ]
-            ]
-
-        Loaded ->
-            [ Html.span [] [ Html.text "[Y]" ]
-            , Html.button [ onClick (ShowPage BestStories) ] [ Html.text "best" ]
-            , Html.button [ onClick (ShowPage NewStories) ] [ Html.text "new" ]
-            , Html.button [ onClick (ShowPage TopStories) ] [ Html.text "top" ]
-            ]
+    [ Html.span [] [ Html.text "[Y]" ]
+    , navButton "new" NewStories pageState
+    , navButton "top" TopStories pageState
+    , navButton "best" BestStories pageState
+    ]

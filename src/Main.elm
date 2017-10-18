@@ -187,6 +187,9 @@ renderStory { descendants, id, title, url } =
                 Nothing ->
                     ""
 
+                Just 0 ->
+                    ""
+
                 Just amount ->
                     " (" ++ toString amount ++ ")"
     in

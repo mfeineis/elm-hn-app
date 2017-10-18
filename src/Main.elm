@@ -8,8 +8,14 @@ import Http
 import Request.Story
 
 
+type PageState
+    = Loading
+    | Loaded
+
+
 type alias Model =
-    { stories : List Story
+    { pageState : PageState
+    , stories : List Story
     , storyIds : List StoryId
     }
 
@@ -26,7 +32,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { stories = [], storyIds = [] }
+    ( { pageState = Loading, stories = [], storyIds = [] }
     , Http.send StoryIdsLoaded Request.Story.fetchNewIds
     )
 
@@ -49,39 +55,88 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ShowCategory "beststories" ->
-            ( model, Http.send StoryIdsLoaded Request.Story.fetchBestIds )
+            ( model |> setLoading
+            , Http.send StoryIdsLoaded Request.Story.fetchBestIds
+            )
 
         ShowCategory "newstories" ->
-            ( model, Http.send StoryIdsLoaded Request.Story.fetchNewIds )
+            ( model |> setLoading
+            , Http.send StoryIdsLoaded Request.Story.fetchNewIds
+            )
 
         ShowCategory "topstories" ->
-            ( model, Http.send StoryIdsLoaded Request.Story.fetchTopIds )
+            ( model |> setLoading
+            , Http.send StoryIdsLoaded Request.Story.fetchTopIds
+            )
 
         ShowCategory _ ->
             -- Hmm, this seems off
-            ( model, Cmd.none )
+            ( model |> setLoaded
+            , Cmd.none
+            )
 
         StoriesLoaded (Err _) ->
-            ( { model | stories = [] }, Cmd.none )
+            ( { model | stories = [] } |> setLoaded
+            , Cmd.none
+            )
 
         StoriesLoaded (Ok stories) ->
             let
                 filtered =
                     List.filterMap identity stories
             in
-            ( { model | stories = filtered }, Cmd.none )
+            ( { model | stories = filtered } |> setLoaded
+            , Cmd.none
+            )
 
         StoryIdsLoaded (Err _) ->
-            ( { model | stories = [], storyIds = [] }, Cmd.none )
+            ( { model | stories = [], storyIds = [] }
+                |> setLoaded
+            , Cmd.none
+            )
 
         StoryIdsLoaded (Ok ids) ->
             ( { model | stories = [], storyIds = ids }
+                |> setLoaded
             , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
             )
 
 
+setLoaded model =
+    { model | pageState = Loaded }
+
+
+setLoading model =
+    { model | pageState = Loading }
+
+
 
 -- Displaying the current model
+
+
+view : Model -> Html Msg
+view ({ pageState, stories } as model) =
+    let
+        message =
+            case pageState of
+                Loading ->
+                    "Loading something..."
+
+                Loaded ->
+                    "No stories around."
+
+        storyList =
+            case stories of
+                [] ->
+                    [ Html.text message ]
+
+                _ ->
+                    List.map renderStory stories
+    in
+    Html.div []
+        [ Html.header [] (headerItems model)
+        , Html.main_ [] storyList
+        ]
 
 
 renderStory : Story -> Html msg
@@ -112,27 +167,17 @@ renderStory { descendants, id, title, url } =
                 ]
 
 
-headerItems : List (Html Msg)
-headerItems =
-    [ Html.span [] [ Html.text "[Y]" ]
-    , Html.button [ onClick (ShowCategory "beststories") ] [ Html.text "best" ]
-    , Html.button [ onClick (ShowCategory "newstories") ] [ Html.text "new" ]
-    , Html.button [ onClick (ShowCategory "topstories") ] [ Html.text "top" ]
-    ]
+headerItems : { a | pageState : PageState } -> List (Html Msg)
+headerItems { pageState } =
+    case pageState of
+        Loading ->
+            [ Html.span [] [ Html.text "[Y]" ]
+            , Html.span [] [ Html.text "Loading" ]
+            ]
 
-
-view : Model -> Html Msg
-view { stories } =
-    let
-        storyList =
-            case stories of
-                [] ->
-                    [ Html.text "No stories around..." ]
-
-                _ ->
-                    List.map renderStory stories
-    in
-    Html.div []
-        [ Html.header [] headerItems
-        , Html.main_ [] storyList
-        ]
+        Loaded ->
+            [ Html.span [] [ Html.text "[Y]" ]
+            , Html.button [ onClick (ShowCategory "beststories") ] [ Html.text "best" ]
+            , Html.button [ onClick (ShowCategory "newstories") ] [ Html.text "new" ]
+            , Html.button [ onClick (ShowCategory "topstories") ] [ Html.text "top" ]
+            ]

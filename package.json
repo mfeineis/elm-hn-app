@@ -4,7 +4,8 @@
     "description": "A simple hacker news client implemented in Elm",
     "main": "index.js",
     "scripts": {
-        "build": "node_modules/.bin/elm-static-html --filename src/Static/Example.elm --output app/www/example.html"
+        "build": "node_modules/.bin/elm-static-html --filename src/Static/Index.elm --output app/www/index.html && node support/add-doctype.js app/www/index.html",
+        "build-example": "node_modules/.bin/elm-static-html --filename src/Static/Example.elm --output app/www/example.html"
     },
     "author": "Martin Feineis",
     "license": "BSD3",

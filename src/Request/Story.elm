@@ -34,4 +34,4 @@ fetchStory : StoryId -> Http.Request (Maybe Story)
 fetchStory id =
     Http.get
         (apiRoot ++ "/item/" ++ Story.storyIdToString id ++ ".json")
-        Story.decoder
+        (Decode.maybe Story.decoder)

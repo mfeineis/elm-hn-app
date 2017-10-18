@@ -97,7 +97,7 @@ update msg model =
 
         StoryIdsLoaded (Ok ids) ->
             ( { model | stories = [], storyIds = ids }
-                |> setLoaded
+                |> setLoading
             , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
             )
 

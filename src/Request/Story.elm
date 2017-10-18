@@ -1,4 +1,10 @@
-module Request.Story exposing (fetchNewIds, fetchStories)
+module Request.Story
+    exposing
+        ( fetchBestIds
+        , fetchNewIds
+        , fetchStories
+        , fetchTopIds
+        )
 
 import Data.Story as Story exposing (Story, StoryId)
 import Http
@@ -18,9 +24,19 @@ fetchIds endpoint =
         (Decode.list Story.storyIdDecoder)
 
 
+fetchBestIds : Http.Request (List StoryId)
+fetchBestIds =
+    fetchIds "/beststories"
+
+
 fetchNewIds : Http.Request (List StoryId)
 fetchNewIds =
     fetchIds "/newstories"
+
+
+fetchTopIds : Http.Request (List StoryId)
+fetchTopIds =
+    fetchIds "/topstories"
 
 
 fetchStories : (Result Http.Error (List (Maybe Story)) -> msg) -> List StoryId -> Cmd msg

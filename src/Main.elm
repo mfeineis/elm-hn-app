@@ -3,6 +3,7 @@ module Main exposing (main)
 import Data.Story exposing (Story, StoryId)
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Html.Events exposing (onClick)
 import Http
 import Request.Story
 
@@ -16,6 +17,7 @@ type alias Model =
 type Msg
     = StoryIdsLoaded (Result Http.Error (List StoryId))
     | StoriesLoaded (Result Http.Error (List (Maybe Story)))
+    | ShowCategory String
 
 
 
@@ -46,13 +48,18 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StoryIdsLoaded (Err _) ->
-            ( { model | stories = [], storyIds = [] }, Cmd.none )
+        ShowCategory "beststories" ->
+            ( model, Http.send StoryIdsLoaded Request.Story.fetchBestIds )
 
-        StoryIdsLoaded (Ok ids) ->
-            ( { model | stories = [], storyIds = ids }
-            , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
-            )
+        ShowCategory "newstories" ->
+            ( model, Http.send StoryIdsLoaded Request.Story.fetchNewIds )
+
+        ShowCategory "topstories" ->
+            ( model, Http.send StoryIdsLoaded Request.Story.fetchTopIds )
+
+        ShowCategory _ ->
+            -- Hmm, this seems off
+            ( model, Cmd.none )
 
         StoriesLoaded (Err _) ->
             ( { model | stories = [] }, Cmd.none )
@@ -63,6 +70,14 @@ update msg model =
                     List.filterMap identity stories
             in
             ( { model | stories = filtered }, Cmd.none )
+
+        StoryIdsLoaded (Err _) ->
+            ( { model | stories = [], storyIds = [] }, Cmd.none )
+
+        StoryIdsLoaded (Ok ids) ->
+            ( { model | stories = [], storyIds = ids }
+            , Request.Story.fetchStories StoriesLoaded (List.take 5 ids)
+            )
 
 
 
@@ -97,12 +112,27 @@ renderStory { descendants, id, title, url } =
                 ]
 
 
+headerItems : List (Html Msg)
+headerItems =
+    [ Html.span [] [ Html.text "[Y]" ]
+    , Html.button [ onClick (ShowCategory "beststories") ] [ Html.text "best" ]
+    , Html.button [ onClick (ShowCategory "newstories") ] [ Html.text "new" ]
+    , Html.button [ onClick (ShowCategory "topstories") ] [ Html.text "top" ]
+    ]
+
+
 view : Model -> Html Msg
 view { stories } =
-    case stories of
-        [] ->
-            Html.text "No stories around..."
+    let
+        storyList =
+            case stories of
+                [] ->
+                    [ Html.text "No stories around..." ]
 
-        _ ->
-            Html.div []
-                (List.map renderStory stories)
+                _ ->
+                    List.map renderStory stories
+    in
+    Html.div []
+        [ Html.header [] headerItems
+        , Html.main_ [] storyList
+        ]

@@ -1,0 +1,14 @@
+{
+    "name": "elm-hn",
+    "version": "0.1.0",
+    "description": "A simple hacker news client implemented in Elm",
+    "main": "index.js",
+    "scripts": {
+        "build": "node_modules/.bin/elm-static-html --filename src/Static/Example.elm --output app/www/example.html"
+    },
+    "author": "Martin Feineis",
+    "license": "BSD3",
+    "dependencies": {
+        "elm-static-html": "^1.3.2"
+    }
+}

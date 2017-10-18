@@ -69,26 +69,12 @@ cordovaShell title bodyAttrs bodyContent =
                 ]
                 []
             , node "title" [] [ text title ]
-            , node "link"
-                [ href "css/index.css"
-                , rel "stylesheet"
-                , type_ "text/css"
-                ]
-                []
             ]
         , node "body"
             bodyAttrs
-            ([ div [ class "app" ]
-                [ h1 [] [ text "Apache Cordova" ]
-                , div [ class "blink", id "deviceready" ]
-                    [ p [ class "event listening" ]
-                        [ text "Connecting to Device" ]
-                    , p [ class "event received" ]
-                        [ text "Device is Ready" ]
-                    ]
-                ]
-             , node "script" [ type_ "text/javascript", src "cordova.js" ] []
-             , node "script" [ type_ "text/javascript", src "js/index.js" ] []
+            ([ node "script" [ type_ "text/javascript", src "cordova.js" ] []
+             , node "script" [ type_ "text/javascript", src "app.js" ] []
+             , node "script" [ type_ "text/javascript", src "setup.js" ] []
              ]
                 ++ bodyContent
             )

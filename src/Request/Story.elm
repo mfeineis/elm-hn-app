@@ -1,8 +1,9 @@
-module Request.Story exposing (fetchNewIds, fetchStory)
+module Request.Story exposing (fetchNewIds, fetchStories)
 
 import Data.Story as Story exposing (Story, StoryId)
 import Http
 import Json.Decode as Decode
+import Task
 
 
 apiRoot : String
@@ -20,6 +21,13 @@ fetchIds endpoint =
 fetchNewIds : Http.Request (List StoryId)
 fetchNewIds =
     fetchIds "/newstories"
+
+
+fetchStories : (Result Http.Error (List Story) -> msg) -> List StoryId -> Cmd msg
+fetchStories msg ids =
+    Task.attempt msg <|
+        Task.sequence
+            (List.map (fetchStory >> Http.toTask) ids)
 
 
 fetchStory : StoryId -> Http.Request Story

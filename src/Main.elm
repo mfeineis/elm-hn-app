@@ -6,6 +6,7 @@ import Html.Attributes as Attr
 import Html.Events exposing (onClick)
 import Http
 import Request.Story
+import Styled
 
 
 type Page
@@ -173,9 +174,9 @@ view ({ pageState, stories } as model) =
                 _ ->
                     List.map renderStory stories
     in
-    Html.div []
-        [ Html.header [] (headerItems model)
-        , Html.main_ [] storyList
+    Styled.pageFrame []
+        [ Styled.pageHeader [] (headerItems model)
+        , Styled.pageMain [] storyList
         ]
 
 
@@ -195,15 +196,14 @@ renderStory { descendants, id, title, url } =
     in
     case url of
         Nothing ->
-            Html.div []
-                [ Html.text <| "ID" ++ Data.Story.storyIdToString id ++ " | " ++ title
+            Styled.storyItem []
+                [ Html.text title
                 , Html.text descendantInfo
                 ]
 
         Just url ->
-            Html.div []
-                [ Html.text <| "ID" ++ Data.Story.storyIdToString id ++ " | "
-                , Html.a [ Attr.href url ]
+            Styled.storyItem []
+                [ Html.a [ Attr.href url ]
                     [ Html.text title
                     ]
                 , Html.text descendantInfo
@@ -214,19 +214,27 @@ navButton : String -> Page -> PageState -> Html Msg
 navButton label reference pageState =
     case pageState of
         Loaded page ->
-            Html.button
-                [ Attr.disabled (reference == page), onClick (ShowPage reference) ]
-                [ Html.text label ]
+            if reference == page then
+                Styled.navButtonSelected
+                    [ onClick (ShowPage reference) ]
+                    [ Html.text label ]
+            else
+                Styled.navButton
+                    [ onClick (ShowPage reference) ]
+                    [ Html.text label ]
 
         Loading _ ->
-            Html.button
-                [ Attr.disabled True, onClick (ShowPage reference) ]
+            Styled.navButtonDisabled
+                [ onClick (ShowPage reference) ]
                 [ Html.text label ]
 
 
 headerItems : { a | pageState : PageState } -> List (Html Msg)
 headerItems { pageState } =
-    [ Html.span [] [ Html.text "[Y]" ]
+    [ Styled.navLogo [ onClick (ShowPage NewStories) ]
+    , Styled.navTitle
+        [ onClick (ShowPage NewStories) ]
+        [ Html.text "Hacker News" ]
     , navButton "new" NewStories pageState
     , navButton "top" TopStories pageState
     , navButton "best" BestStories pageState

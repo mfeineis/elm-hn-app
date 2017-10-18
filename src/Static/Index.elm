@@ -46,7 +46,7 @@ cordovaShell title bodyAttrs bodyContent =
                         , "connect-src https://hacker-news.firebaseio.com"
                         , "style-src 'self' 'unsafe-inline' "
                         , "media-src *"
-                        , "img-src 'self' data: content:;"
+                        , "img-src 'self' https://news.ycombinator.com data: content:;"
                         ]
                 ]
                 []

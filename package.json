@@ -7,6 +7,7 @@
         "build": "node_modules/.bin/elm-static-html --filename src/Static/Index.elm --output app/www/index.html && node support/add-doctype.js app/www/index.html && node support/copy-js.js js/setup.js app/www/setup.js && elm-make src/Main.elm --output=app/www/app.js",
         "build-debug": "node_modules/.bin/elm-static-html --filename src/Static/Index.elm --output app/www/index.html && node support/add-doctype.js app/www/index.html && node support/copy-js.js js/setup.js app/www/setup.js && elm-make src/Main.elm --output=app/www/app.js --debug",
         "build-example": "node_modules/.bin/elm-static-html --filename src/Static/Example.elm --output app/www/example.html",
+        "dev": "elm-reactor --port=8080",
         "test": "node_modules/.bin/elm-test",
         "test-sync": "node_modules/.bin/elm-test --add-dependencies tests/elm-package.json",
         "test-ci": "node_modules/.bin/elm-test --report=junit",

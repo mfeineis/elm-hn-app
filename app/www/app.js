@@ -8557,6 +8557,121 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
 
+var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$html$Html_Events$targetChecked = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'checked',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$bool);
+var _elm_lang$html$Html_Events$targetValue = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'value',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
+var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
+var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _elm_lang$html$Html_Events$onFocus = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'focus',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onBlur = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'blur',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
+	_elm_lang$html$Html_Events$defaultOptions,
+	{preventDefault: true});
+var _elm_lang$html$Html_Events$onSubmit = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'submit',
+		_elm_lang$html$Html_Events$onSubmitOptions,
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onCheck = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
+};
+var _elm_lang$html$Html_Events$onInput = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'input',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
+var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseout',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseover',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseleave',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseenter',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseup',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mousedown',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'dblclick',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'click',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
+
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -8978,7 +9093,9 @@ var _user$project$Request_Story$fetchIds = function (endpoint) {
 			A2(_elm_lang$core$Basics_ops['++'], endpoint, '.json')),
 		_elm_lang$core$Json_Decode$list(_user$project$Data_Story$storyIdDecoder));
 };
+var _user$project$Request_Story$fetchBestIds = _user$project$Request_Story$fetchIds('/beststories');
 var _user$project$Request_Story$fetchNewIds = _user$project$Request_Story$fetchIds('/newstories');
+var _user$project$Request_Story$fetchTopIds = _user$project$Request_Story$fetchIds('/topstories');
 var _user$project$Request_Story$fetchStory = function (id) {
 	return A2(
 		_elm_lang$http$Http$get,
@@ -8992,7 +9109,7 @@ var _user$project$Request_Story$fetchStory = function (id) {
 					_elm_lang$core$Basics_ops['++'],
 					_user$project$Data_Story$storyIdToString(id),
 					'.json'))),
-		_user$project$Data_Story$decoder);
+		_elm_lang$core$Json_Decode$maybe(_user$project$Data_Story$decoder));
 };
 var _user$project$Request_Story$fetchStories = F2(
 	function (msg, ids) {
@@ -9018,13 +9135,17 @@ var _user$project$Main$renderStory = function (_p0) {
 		if (_p2.ctor === 'Nothing') {
 			return '';
 		} else {
-			return A2(
-				_elm_lang$core$Basics_ops['++'],
-				'(',
-				A2(
+			if (_p2._0 === 0) {
+				return '';
+			} else {
+				return A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(_p2._0),
-					')'));
+					' (',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						_elm_lang$core$Basics$toString(_p2._0),
+						')'));
+			}
 		}
 	}();
 	var _p3 = _p1.url;
@@ -9085,94 +9206,291 @@ var _user$project$Main$renderStory = function (_p0) {
 			});
 	}
 };
-var _user$project$Main$view = function (_p6) {
+var _user$project$Main$setStoryIds = F2(
+	function (storyIds, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{storyIds: storyIds});
+	});
+var _user$project$Main$setStories = F2(
+	function (stories, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{stories: stories});
+	});
+var _user$project$Main$resetStories = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			stories: {ctor: '[]'}
+		});
+};
+var _user$project$Main$getPage = function (_p6) {
 	var _p7 = _p6;
-	var _p9 = _p7.stories;
-	var _p8 = _p9;
-	if (_p8.ctor === '[]') {
-		return _elm_lang$html$Html$text('No stories around...');
+	var _p8 = _p7.pageState;
+	if (_p8.ctor === 'Loaded') {
+		return _p8._0;
 	} else {
-		return A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			A2(_elm_lang$core$List$map, _user$project$Main$renderStory, _p9));
+		return _p8._0;
 	}
 };
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {stories: a, storyIds: b};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {pageState: a, stories: b, storyIds: c};
 	});
+var _user$project$Main$TopStories = {ctor: 'TopStories'};
+var _user$project$Main$NewStories = {ctor: 'NewStories'};
+var _user$project$Main$BestStories = {ctor: 'BestStories'};
+var _user$project$Main$Loading = function (a) {
+	return {ctor: 'Loading', _0: a};
+};
+var _user$project$Main$setLoading = F2(
+	function (page, _p9) {
+		var _p10 = _p9;
+		return _elm_lang$core$Native_Utils.update(
+			_p10,
+			{
+				pageState: _user$project$Main$Loading(page)
+			});
+	});
+var _user$project$Main$Loaded = function (a) {
+	return {ctor: 'Loaded', _0: a};
+};
+var _user$project$Main$setLoaded = function (_p11) {
+	var _p12 = _p11;
+	var _p13 = _p12;
+	return _elm_lang$core$Native_Utils.update(
+		_p13,
+		{
+			pageState: _user$project$Main$Loaded(
+				_user$project$Main$getPage(_p13))
+		});
+};
+var _user$project$Main$ShowPage = function (a) {
+	return {ctor: 'ShowPage', _0: a};
+};
+var _user$project$Main$navButton = F3(
+	function (label, reference, pageState) {
+		var _p14 = pageState;
+		if (_p14.ctor === 'Loaded') {
+			return A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$disabled(
+						_elm_lang$core$Native_Utils.eq(reference, _p14._0)),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Main$ShowPage(reference)),
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(label),
+					_1: {ctor: '[]'}
+				});
+		} else {
+			return A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$disabled(true),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Main$ShowPage(reference)),
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(label),
+					_1: {ctor: '[]'}
+				});
+		}
+	});
+var _user$project$Main$headerItems = function (_p15) {
+	var _p16 = _p15;
+	var _p17 = _p16.pageState;
+	return {
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$span,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('[Y]'),
+				_1: {ctor: '[]'}
+			}),
+		_1: {
+			ctor: '::',
+			_0: A3(_user$project$Main$navButton, 'new', _user$project$Main$NewStories, _p17),
+			_1: {
+				ctor: '::',
+				_0: A3(_user$project$Main$navButton, 'top', _user$project$Main$TopStories, _p17),
+				_1: {
+					ctor: '::',
+					_0: A3(_user$project$Main$navButton, 'best', _user$project$Main$BestStories, _p17),
+					_1: {ctor: '[]'}
+				}
+			}
+		}
+	};
+};
+var _user$project$Main$view = function (_p18) {
+	var _p19 = _p18;
+	var _p22 = _p19.stories;
+	var message = function () {
+		var _p20 = _p19.pageState;
+		if (_p20.ctor === 'Loading') {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'Loading page ',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(_p20._0),
+					' ...'));
+		} else {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'No stories around for page ',
+				_elm_lang$core$Basics$toString(_p20._0));
+		}
+	}();
+	var storyList = function () {
+		var _p21 = _p22;
+		if (_p21.ctor === '[]') {
+			return {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(message),
+				_1: {ctor: '[]'}
+			};
+		} else {
+			return A2(_elm_lang$core$List$map, _user$project$Main$renderStory, _p22);
+		}
+	}();
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$header,
+				{ctor: '[]'},
+				_user$project$Main$headerItems(_p19)),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$main_,
+					{ctor: '[]'},
+					storyList),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Main$StoriesLoaded = function (a) {
 	return {ctor: 'StoriesLoaded', _0: a};
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p10 = msg;
-		if (_p10.ctor === 'StoryIdsLoaded') {
-			if (_p10._0.ctor === 'Err') {
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							stories: {ctor: '[]'},
-							storyIds: {ctor: '[]'}
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			} else {
-				var _p11 = _p10._0._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							stories: {ctor: '[]'},
-							storyIds: _p11
-						}),
-					_1: A2(
-						_user$project$Request_Story$fetchStories,
-						_user$project$Main$StoriesLoaded,
-						A2(_elm_lang$core$List$take, 5, _p11))
-				};
-			}
-		} else {
-			if (_p10._0.ctor === 'Err') {
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							stories: {ctor: '[]'}
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			} else {
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{stories: _p10._0._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			}
-		}
-	});
 var _user$project$Main$StoryIdsLoaded = function (a) {
 	return {ctor: 'StoryIdsLoaded', _0: a};
 };
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: {
+		pageState: _user$project$Main$Loading(_user$project$Main$NewStories),
 		stories: {ctor: '[]'},
 		storyIds: {ctor: '[]'}
 	},
 	_1: A2(_elm_lang$http$Http$send, _user$project$Main$StoryIdsLoaded, _user$project$Request_Story$fetchNewIds)
 };
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p23 = msg;
+		switch (_p23.ctor) {
+			case 'ShowPage':
+				switch (_p23._0.ctor) {
+					case 'BestStories':
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_user$project$Main$setLoading,
+								_user$project$Main$BestStories,
+								_user$project$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _user$project$Main$StoryIdsLoaded, _user$project$Request_Story$fetchBestIds)
+						};
+					case 'NewStories':
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_user$project$Main$setLoading,
+								_user$project$Main$NewStories,
+								_user$project$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _user$project$Main$StoryIdsLoaded, _user$project$Request_Story$fetchNewIds)
+						};
+					default:
+						return {
+							ctor: '_Tuple2',
+							_0: A2(
+								_user$project$Main$setLoading,
+								_user$project$Main$TopStories,
+								_user$project$Main$resetStories(model)),
+							_1: A2(_elm_lang$http$Http$send, _user$project$Main$StoryIdsLoaded, _user$project$Request_Story$fetchTopIds)
+						};
+				}
+			case 'StoriesLoaded':
+				if (_p23._0.ctor === 'Err') {
+					return {
+						ctor: '_Tuple2',
+						_0: _user$project$Main$setLoaded(
+							_user$project$Main$resetStories(model)),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _user$project$Main$setLoaded(
+							A2(
+								_user$project$Main$setStories,
+								A2(_elm_lang$core$List$filterMap, _elm_lang$core$Basics$identity, _p23._0._0),
+								model)),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			default:
+				if (_p23._0.ctor === 'Err') {
+					return {
+						ctor: '_Tuple2',
+						_0: _user$project$Main$setLoaded(
+							_user$project$Main$resetStories(
+								A2(
+									_user$project$Main$setStoryIds,
+									{ctor: '[]'},
+									model))),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					var _p24 = _p23._0._0;
+					return {
+						ctor: '_Tuple2',
+						_0: A2(
+							_user$project$Main$setLoading,
+							_user$project$Main$getPage(model),
+							_user$project$Main$resetStories(
+								A2(_user$project$Main$setStoryIds, _p24, model))),
+						_1: A2(
+							_user$project$Request_Story$fetchStories,
+							_user$project$Main$StoriesLoaded,
+							A2(_elm_lang$core$List$take, 5, _p24))
+					};
+				}
+		}
+	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$Main$init,
-		subscriptions: function (_p12) {
+		subscriptions: function (_p25) {
 			return _elm_lang$core$Platform_Sub$none;
 		},
 		update: _user$project$Main$update,

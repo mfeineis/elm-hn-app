@@ -4,6 +4,7 @@ import Data.Story exposing (Story, StoryId)
 import Html exposing (Html)
 import Http
 import Request.Story
+import Task
 
 
 type alias Model =
@@ -14,7 +15,7 @@ type alias Model =
 
 type Msg
     = StoryIdsLoaded (Result Http.Error (List StoryId))
-    | StoryLoaded (Result Http.Error Story)
+    | StoriesLoaded (Result Http.Error (List Story))
 
 
 
@@ -49,22 +50,35 @@ update msg model =
             ( { model | storyIds = [] }, Cmd.none )
 
         StoryIdsLoaded (Ok ids) ->
-            let
-                cmd =
-                    case List.head ids of
-                        Nothing ->
-                            Cmd.none
+            ( { model | stories = [], storyIds = ids }
+            , fetchStoriesV1 (List.take 5 ids)
+            )
 
-                        Just id ->
-                            Http.send StoryLoaded (Request.Story.fetchStory id)
-            in
-            ( { model | storyIds = ids }, cmd )
-
-        StoryLoaded (Err _) ->
+        StoriesLoaded (Err _) ->
             ( { model | stories = [] }, Cmd.none )
 
-        StoryLoaded (Ok story) ->
-            ( { model | stories = [ story ] }, Cmd.none )
+        StoriesLoaded (Ok stories) ->
+            ( { model | stories = stories }, Cmd.none )
+
+
+fetchStoriesV1 : List StoryId -> Cmd Msg
+fetchStoriesV1 ids =
+    let
+        fetchStory =
+            Request.Story.fetchStory
+
+        convertHttpRequestToTask =
+            Http.toTask
+
+        fetchStoryAndConvertToTask =
+            \storyId ->
+                fetchStory storyId
+                    |> convertHttpRequestToTask
+    in
+    Task.attempt StoriesLoaded
+        (Task.sequence
+            (List.map fetchStoryAndConvertToTask ids)
+        )
 
 
 

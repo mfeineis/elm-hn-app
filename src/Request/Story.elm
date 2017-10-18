@@ -1,4 +1,4 @@
-module Request.Story exposing (fetchNew)
+module Request.Story exposing (fetchNewIds, fetchStory)
 
 import Data.Story as Story
 import Http
@@ -7,16 +7,23 @@ import Json.Decode as Decode
 
 apiRoot : String
 apiRoot =
-    "https://hacker-news.firebaseio.com/v0/"
+    "https://hacker-news.firebaseio.com/v0"
 
 
-fetch : String -> Http.Request (List Story.StoryId)
-fetch kind =
+fetchIds : String -> Http.Request (List Story.StoryId)
+fetchIds endpoint =
     Http.get
-        (apiRoot ++ kind ++ ".json")
+        (apiRoot ++ endpoint ++ ".json")
         (Decode.list Story.storyIdDecoder)
 
 
-fetchNew : Http.Request (List Story.StoryId)
-fetchNew =
-    fetch "newstories"
+fetchNewIds : Http.Request (List Story.StoryId)
+fetchNewIds =
+    fetchIds "/newstories"
+
+
+fetchStory : Story.StoryId -> Http.Request Story.Story
+fetchStory id =
+    Http.get
+        (apiRoot ++ "/item/" ++ Story.storyIdToString id ++ ".json")
+        Story.decoder

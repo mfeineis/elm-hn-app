@@ -7,12 +7,14 @@ import Request.Story
 
 
 type alias Model =
-    { stories : List StoryId
+    { stories : List Story
+    , storyIds : List StoryId
     }
 
 
 type Msg
-    = StoriesLoaded (Result Http.Error (List StoryId))
+    = StoryIdsLoaded (Result Http.Error (List StoryId))
+    | StoryLoaded (Result Http.Error Story)
 
 
 
@@ -21,8 +23,8 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { stories = [] }
-    , Http.send StoriesLoaded Request.Story.fetchNew
+    ( { stories = [], storyIds = [] }
+    , Http.send StoryIdsLoaded Request.Story.fetchNewIds
     )
 
 
@@ -43,21 +45,36 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StoriesLoaded (Err _) ->
+        StoryIdsLoaded (Err _) ->
+            ( { model | storyIds = [] }, Cmd.none )
+
+        StoryIdsLoaded (Ok ids) ->
+            let
+                cmd =
+                    case List.head ids of
+                        Nothing ->
+                            Cmd.none
+
+                        Just id ->
+                            Http.send StoryLoaded (Request.Story.fetchStory id)
+            in
+            ( { model | storyIds = ids }, cmd )
+
+        StoryLoaded (Err _) ->
             ( { model | stories = [] }, Cmd.none )
 
-        StoriesLoaded (Ok ids) ->
-            ( { model | stories = ids }, Cmd.none )
+        StoryLoaded (Ok story) ->
+            ( { model | stories = [ story ] }, Cmd.none )
 
 
 
 -- Displaying the current model
 
 
-renderStory : StoryId -> Html msg
-renderStory id =
+renderStory : Story -> Html msg
+renderStory { id, title } =
     Html.div []
-        [ Html.text <| "StoryId: " ++ toString id
+        [ Html.text <| "ID" ++ toString id ++ " | " ++ title
         ]
 
 

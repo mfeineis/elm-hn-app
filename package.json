@@ -16,7 +16,7 @@
     "author": "Martin Feineis",
     "license": "BSD3",
     "dependencies": {
-        "elm-static-html": "^1.3.2",
-        "elm-test": "^0.18.9"
+        "elm-static-html": ">=1.3.2",
+        "elm-test": ">=0.18.9"
     }
 }
